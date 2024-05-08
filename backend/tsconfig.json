@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+
+        /* Language and Environment */
+        "target": "ESNext",
+
+        /* Modules */
+        "module": "CommonJS",
+        "rootDir": "./src",
+        "outDir": "./dist",
+        "moduleResolution": "Node10",
+        
+        /* Type checking */
+        "strict": true,
+        
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true
+    },
+
+    "include": ["src"]
+}
