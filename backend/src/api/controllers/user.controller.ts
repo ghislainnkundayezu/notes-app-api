@@ -2,8 +2,8 @@ import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 
 
-import { User } from "../models";
-import { HTTP_BAD_REQUEST, HTTP_CREATED, HTTP_NOT_FOUND } from "../../config/constants";
+import { Category, Note, User } from "../models";
+import { HTTP_BAD_REQUEST, HTTP_CREATED, HTTP_INTERNAL_SERVER_ERROR, HTTP_NOT_FOUND, HTTP_OK, HTTP_UNAUTHORIZED } from "../../config/constants";
 import { generateToken } from "../helpers/jwt";
 
 /**
@@ -45,6 +45,7 @@ const registerUser = async (req: Request, res: Response): Promise<Response> => {
         
         await newUser.save();
 
+
         const token = generateToken({
             userId: newUser._id,
             userEmail: newUser.email,
@@ -57,14 +58,14 @@ const registerUser = async (req: Request, res: Response): Promise<Response> => {
 			sameSite: 'none',
         });
 
-        return res.json({
+        return res.status(HTTP_CREATED).json({
             success: true,
             message: "User Registered",
             error: null,
         });
 
     }catch(error: any) {
-        return res.json({
+        return res.status(HTTP_UNAUTHORIZED).json({
             success: false,
             message: "Failed to Register User",
             error: error.message,
@@ -121,14 +122,14 @@ const loginUser = async (req: Request, res: Response): Promise<Response> => {
         });
 
 
-        return res.json({
+        return res.status(HTTP_OK).json({
             success: true,
             message: "User login succeeded",
             error: null,
         });
 
     }catch(error: any) {
-        return res.json({
+        return res.status(HTTP_UNAUTHORIZED).json({
             success: false,
             message: "User Login Failed",
             errro: error.message,
@@ -149,7 +150,7 @@ const logoutUser = async (req: Request, res: Response): Promise<Response> => {
         return res.clearCookie("auth-token");
 
     }catch(error: any) {
-        return res.json({
+        return res.status(HTTP_UNAUTHORIZED).json({
             success: false,
             message: "User Logout Failed",
             error: error.message,
@@ -158,7 +159,7 @@ const logoutUser = async (req: Request, res: Response): Promise<Response> => {
 }
 
 /**
- * .
+ * Controller function to fetch notes of user from the database.
  * 
  * @param req - the incomming request object.
  * @param res - the outgoing response object.
@@ -166,18 +167,44 @@ const logoutUser = async (req: Request, res: Response): Promise<Response> => {
  */
 const getNotes = async (req: Request, res: Response): Promise<Response> => {
     try {
-        return res.json({
-            success: true
+        const { userId } = req.user;
+
+        const notes = await Note.find({ owner: userId })
+                                    .select("title details createAt -_id -owner")
+                                    .populate({
+                                        path: 'category',
+                                        select: "title -_id"
+                                    });
+
+        if (notes.length === 0) {
+
+            return res.status(HTTP_NOT_FOUND).json({
+                success: false,
+                message: "No notes found",
+                data: notes,
+                error: null,
+            });
+        }
+
+        return res.status(HTTP_OK).json({
+            success: true,
+            data: notes,
+            message: "Notes successfully retrieved",
+            error: null,
         });
-    }catch(error) {
-        return res.json({
-            success: false
+
+    }catch(error: any) {
+        return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: "Failed to retrieve notes",
+            data: null,
+            error: error.message,
         });
     }
 }
 
 /**
- * 
+ * Controller function to fetch notes of a user by category from the database.
  * 
  * @param req - the incomming request object.
  * @param res - the outgoing response object.
@@ -185,12 +212,59 @@ const getNotes = async (req: Request, res: Response): Promise<Response> => {
  */
 const getNotesByCategory = async (req: Request, res: Response): Promise<Response> => {
     try {
-        return res.json({
-            success: true
+        const { userId, userEmail } = req.user;
+        const category = req.query;
+
+        const notes = await Category.find({
+                            owner: userId,
+                            label: category,
+                        })
+                        .populate({
+                            path: "notes",
+                            select: "-owner",
+                            populate: {
+                                path: 'category',
+                                select: "title -_id",
+                            }
+                        });
+                       
+        // CASE STUDY: 
+        const notes2 = await Note.find({ 
+                            owner: userId,
+                            })
+                            .populate({
+                                path: "category",
+                                select: "title -_id",
+                                populate: {
+                                    path: 'category',
+                                    select: "title -_id",
+                                }  
+                            })
+
+
+        if (notes.length === 0) {
+
+            return res.status(HTTP_NOT_FOUND).json({
+                success: false,
+                message: "No notes found",
+                data: notes,
+                error: null,
+            });
+        }
+
+        return res.status(HTTP_OK).json({
+            success: true,
+            data: notes,
+            message: "Notes successfully retrieved",
+            error: null,
         });
-    }catch(error) {
-        return res.json({
-            success: false
+
+    }catch(error: any) {
+        return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: "Failed to retrieve notes",
+            data: null,
+            error: error.message,
         });
     }
 }

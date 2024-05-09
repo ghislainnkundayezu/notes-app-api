@@ -27,10 +27,17 @@ const NoteSchema = new Schema<INote>({
         required: true,
         ref: "User",
     },
+    status: {
+        type: String,
+        required: true,
+        default: "ongoing",
+        enum: ["ongoing", "complete"],
+    },
+
     category: {
         type: Schema.Types.ObjectId,
-        required: true,
         ref: "Category",
+        default: null,
     }
 });
 

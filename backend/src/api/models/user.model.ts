@@ -23,10 +23,7 @@ const UserSchema = new Schema<IUser>({
         required: true,
         trim: true,
     },
-    categories: {
-        type: [ Schema.Types.ObjectId ],
-        ref: "Category",
-    }
+    
 });
 
 // middlewares.
