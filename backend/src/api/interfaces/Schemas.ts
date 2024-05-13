@@ -21,7 +21,6 @@ interface INote extends Document {
 interface ICategory extends Document {
     label: string,
     owner: Types.ObjectId,
-    notes: Types.ObjectId[],
 }
 
 

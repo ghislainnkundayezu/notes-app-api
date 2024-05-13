@@ -13,10 +13,6 @@ const CategorySchema = new Schema<ICategory>({
         type: Schema.Types.ObjectId,
         ref: "User",
     },
-    notes: {
-        type: [Schema.Types.ObjectId],
-        ref: "Note",
-    }
 });
 
 // create a Mongoose model from the CategorySchema for the 'categories' collection.

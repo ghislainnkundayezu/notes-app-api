@@ -9,7 +9,7 @@ interface DecodedPayload extends Object {
 
 declare module 'express' {
     interface Request {
-        user: DecodedPayload, 
+        user?: DecodedPayload, 
     }
 }
 
@@ -22,7 +22,7 @@ declare module 'express' {
  * @param {NextFunction} next 
  * @returns 
  */
-const isAuthenticated = async (req: Request, res: Response, next: NextFunction)  => {
+export const isAuthenticated = async (req: Request, res: Response, next: NextFunction)  => {
     try {
         const token = req.cookies["auth-token"];
 
