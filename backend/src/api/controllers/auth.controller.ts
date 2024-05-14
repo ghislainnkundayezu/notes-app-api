@@ -1,10 +1,12 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import bcrypt from "bcrypt";
 
 
 import { User } from "../models";
 import { HTTP_BAD_REQUEST, HTTP_CREATED, HTTP_INTERNAL_SERVER_ERROR, HTTP_NOT_FOUND, HTTP_OK, HTTP_UNAUTHORIZED } from "../../config/constants";
 import { generateToken } from "../helpers/jwt";
+import { BadRequestError, NotFoundError } from "../errors/customErrors";
+import { StatusCodes } from "http-status-codes";
 
 /**
  * Controller function to handle user registration.
@@ -13,11 +15,12 @@ import { generateToken } from "../helpers/jwt";
  * @param res - the outgoing request object.
  * @returns { Promise<Response> } - A promise that resolves with the response object.
  */
-export const registerUser = async (req: Request, res: Response): Promise<Response> => {
+export const registerUser = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
 
         const { username, email, password } = req.body;
 
+        // TODO: Remember to add validation.
         if (!username || !email || !password) {
             return res.status(HTTP_BAD_REQUEST).json({
                 success: false,
@@ -26,16 +29,10 @@ export const registerUser = async (req: Request, res: Response): Promise<Respons
             });
         }
 
-        // checking if the email exists.
+        //TODO: Remember to remove it.
         const emailExists = await User.findOne({ email: email })
 
-        if ( emailExists ) {
-            return res.status(HTTP_BAD_REQUEST).json({
-                success: false,
-                message: "Email Exists",
-                null: null,
-            });
-        }
+        if (emailExists) throw new BadRequestError("Email Exists");
         
         const newUser = new User({
             username: username,
@@ -58,18 +55,15 @@ export const registerUser = async (req: Request, res: Response): Promise<Respons
 			sameSite: 'none',
         });
 
-        return res.status(HTTP_CREATED).json({
+        return res.status(StatusCodes.CREATED).json({
             success: true,
             message: "User Registered",
             error: null,
         });
 
-    }catch(error: any) {
-        return res.status(HTTP_UNAUTHORIZED).json({
-            success: false,
-            message: "Failed to Register User",
-            error: error.message,
-        });
+    }catch(error) {
+
+        next(error);
     }
 }
 
@@ -80,12 +74,13 @@ export const registerUser = async (req: Request, res: Response): Promise<Respons
  * @param res - the outgoing response object.
  * @returns { Promise<Response> } -A promise that resolves with the response object.
  */
-export const loginUser = async (req: Request, res: Response): Promise<Response> => {
+export const loginUser = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
 
         const { username, email, password } = req.body;
 
         if(!username || !email || !password) { 
+            
             return res.status(HTTP_BAD_REQUEST).json({
                 success: false,
                 message: "Incomplere Data",
@@ -100,13 +95,10 @@ export const loginUser = async (req: Request, res: Response): Promise<Response> 
 
         const passwordsMatch= user && await bcrypt.compare(password, user.password);
 
-        if (!user || !passwordsMatch) {
-            return res.status(HTTP_NOT_FOUND).json({
-                success: false,
-                message: "User Not Found",
-                error: null,
-            });
-        }
+        if (!user) throw new NotFoundError("User Not Found.");
+
+        if (!passwordsMatch) throw new BadRequestError("Passwords don't match.")
+        
 
 
         const token = generateToken({
@@ -122,18 +114,16 @@ export const loginUser = async (req: Request, res: Response): Promise<Response> 
         });
 
 
-        return res.status(HTTP_OK).json({
+        return res.status(StatusCodes.OK).json({
             success: true,
             message: "User login succeeded",
             error: null,
         });
 
-    }catch(error: any) {
-        return res.status(HTTP_UNAUTHORIZED).json({
-            success: false,
-            message: "User Login Failed",
-            errro: error.message,
-        });
+    }catch(error) {
+
+        next(error);
+
     }
 }
 
@@ -144,17 +134,14 @@ export const loginUser = async (req: Request, res: Response): Promise<Response> 
  * @param res - the outgoing response object.
  * @returns { Promise<Response> } -A promise that resolves with the response object.
  */
-export const logoutUser = async (req: Request, res: Response): Promise<Response> => {
+export const logoutUser = async (req: Request, res: Response, next: NextFunction): Promise<Response | void>  => {
     try {
-        
-        return res.clearCookie("auth-token");
 
-    }catch(error: any) {
-        return res.status(HTTP_UNAUTHORIZED).json({
-            success: false,
-            message: "User Logout Failed",
-            error: error.message,
-        });
+        return res.status(StatusCodes.OK).clearCookie("auth-token");
+
+    }catch(error) {
+
+        next(error);
     }
 }
 

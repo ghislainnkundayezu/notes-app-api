@@ -1,97 +1,80 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 
 import { Category, Note } from "../models";
 import { HTTP_BAD_REQUEST, HTTP_CREATED, HTTP_INTERNAL_SERVER_ERROR, HTTP_NOT_FOUND, HTTP_NO_CONTENT, HTTP_OK } from "../../config/constants";
+import { NotFoundError } from "../errors/customErrors";
+import { StatusCodes } from "http-status-codes";
 
 /**
  * 
  */
-export const createCategory = async (req: Request, res: Response): Promise<Response> => {
+export const createCategory = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     
     try {    
 
         const { userId } = req.user!;
         const { categoryLabel } = req.body;
 
+        //TODO: remember to add validation
         if (!categoryLabel) {
             return  res.status(HTTP_BAD_REQUEST).json({
                 success: false,
                 message: "A label for the category isn't provided.",
-                null: null,
             });
         }
 
         const newCategory = new Category({ label: categoryLabel, owner: userId });
         await newCategory.save();
 
-        return res.status(HTTP_CREATED).json({
+        return res.status(StatusCodes.CREATED).json({
             success: true,
             message: "category successfully created.",
-            error: null,
         });
 
-    }catch(error: any) {
-        return  res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-            success: false,
-            message: "Failed to create a new category",
-            null: error.message,
-        });
+    }catch(error) {
+
+        next(error);
     }
 
 }
 
-export const updateCategoryLabel = async (req: Request, res: Response) => {
+export const updateCategoryLabel = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
         const { userId } = req.user!;
-        const { categoryId } = req.query;
+        const { categoryId } = req.params!;
         const {  newLabel } = req.body;
         
-        if( !newLabel || !categoryId ) {
-            return res.status(HTTP_BAD_REQUEST).json({
-                success: false,
-                message: "Category Id and a new Label are required",
-                error: null,
-            });
-        }
-
-        const category = await Category.findOneAndUpdate(
+        const category = await Category.updateOne(
             { _id: categoryId, owner: userId },
             { $set: { label: newLabel } }
         );
 
-        if (!category) {
-            return res.status(HTTP_NOT_FOUND).json({
-                success: false,
-                message: "Category not found",
-                error: null,
-            });
+        if (category.modifiedCount === 0) {
+            throw new Error("Failed to update the label");
         }
+        
 
-        return res.status(HTTP_NO_CONTENT).send();
+        return res.status(StatusCodes.NO_CONTENT).send();
 
-    }catch(error: any) {
-        return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-            success: false,
-            message: "Failed to delete category",
-            error: error.message,
-        });
+    }catch(error) {
+        next(error);
     }
 }
 
 /**
  * 
  */
-export const deleteCategory = async (req: Request, res: Response) => {
+export const deleteCategory = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     
     try {
         const { userId } = req.user!;
 
-        const { categoryId } = req.query;
+        const { categoryId } = req.params;
 
         // let's first remove the category from the notes.
-        const note = await Note.updateMany(
+        await Note.updateMany(
             { userId, category: categoryId },
-            { $set: { Category: null } },
+            { $set: { category: null } },
         );
 
         const deleteCategory = await Category.deleteOne({ 
@@ -99,26 +82,18 @@ export const deleteCategory = async (req: Request, res: Response) => {
             owner: userId,
         });
 
-        if (deleteCategory.deletedCount === 0) {
-            return res.status(HTTP_NOT_FOUND).json({
-                success: false,
-                message: "No such category",
-                error: null,
-            });
-        }
+        //if (deleteCategory.deletedCount === 0) throw new NotFoundError("Category Not Found");
+        
+        
 
-        res.status(HTTP_OK).json({
+        res.status(StatusCodes.OK).json({
             success: true,
             message: "Category deleted successfully",
-            error: null,
         });
     
-    }catch(error: any) {
-        res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-            success: false,
-            message: "Failed to delete category",
-            error: error.message,
-        });
+    }catch(error) {
+        
+        next(error);;
     }
 }
 
@@ -131,35 +106,24 @@ export const deleteCategory = async (req: Request, res: Response) => {
  * @param res 
  * @returns 
  */
-export const getCategories = async (req: Request, res: Response) => {
+export const getCategories = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
         const { userId } = req.user!;
 
         const categories = await Category.find({ owner: userId });
                                         
         if (categories.length === 0) {
-            return res.status(HTTP_NOT_FOUND).json({
-                success: false,
-                message: "No Categories found",
-                data: categories,
-                error: null,
-            });
+            throw new NotFoundError("No categories Found");
         }
 
-        return res.status(HTTP_OK).json({
+        return res.status(StatusCodes.OK).json({
             success: true,
             data: categories,
             message: "categories successfully retrieved",
-            error: null,
         });
 
-    }catch(error: any) {
-        return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-            success: false,
-            message: "Failed to retrieve categories",
-            data: null,
-            error: error.message,
-        });
+    }catch(error) {
+        next(error);   
     }
 }
 

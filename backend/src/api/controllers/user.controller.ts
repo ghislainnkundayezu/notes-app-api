@@ -1,9 +1,11 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 
 import { User } from "../models";
-import { HTTP_BAD_REQUEST, HTTP_INTERNAL_SERVER_ERROR, HTTP_NOT_FOUND, HTTP_NO_CONTENT } from "../../config/constants";
+import { HTTP_BAD_REQUEST, HTTP_NOT_FOUND, HTTP_NO_CONTENT } from "../../config/constants";
+import { NotFoundError } from "../errors/customErrors";
+import { StatusCodes } from "http-status-codes";
 
-export const getUser = async (req: Request, res: Response): Promise<Response> => {
+export const getUser = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
         const { userId, userEmail } = req.user!;
 
@@ -13,31 +15,22 @@ export const getUser = async (req: Request, res: Response): Promise<Response> =>
         })
         .select("-_id -password");
 
-        if (!user) {
-            return res.status(HTTP_NOT_FOUND).json({
-                success: false,
-                message: "User Not Found",
-                error: null,
-            });
-        }
+        if (!user) throw new NotFoundError("User Not Found");
+            
 
-        return res.status(HTTP_NOT_FOUND).json({
+        return res.status(StatusCodes.OK).json({
             success: true,
             message: "User Found",
-            error: null,
             data: user,
         });
 
-    }catch(error: any) {
-        return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-            success: false,
-            message: "Failed to retrieve user data",
-            error: error.message,
-        });
+    }catch(error) {
+
+        next(error);
     }
 }
 
-export const updateUsername = async (req: Request, res: Response ): Promise<Response> => {
+export const updateUsername = async (req: Request, res: Response, next: NextFunction ): Promise<Response | void> => {
     try {
         const { userId } = req.user!;
 
@@ -56,24 +49,15 @@ export const updateUsername = async (req: Request, res: Response ): Promise<Resp
             { $set: {username: newUsername } }
         );
 
-        if (user.matchedCount === 0) {
-            return res.status(HTTP_NOT_FOUND).json({
-                success: true,
-                message: "User not found",
-                error: null,
-            });
-        }
+        if (user.matchedCount === 0) throw new NotFoundError("User Not Found.");
 
         if (user.modifiedCount === 0) throw new Error("No document was updated");
 
-        return res.status(HTTP_NO_CONTENT).send();
+        return res.status(StatusCodes.NO_CONTENT).send();
 
-    }catch(error: any) {
-        return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-            success: false,
-            message: "Failed to update the title of the note",
-            error: error.message,
-            
-        });
+    }catch(error) {
+
+        next(error);
+
     }
 }

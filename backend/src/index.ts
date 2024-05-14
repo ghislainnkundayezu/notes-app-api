@@ -4,8 +4,8 @@ import cookieParser from "cookie-parser";
 
 import db_connection from "./config/database";
 import { PORT } from "./config/constants";
-import { authRoutes } from "./api/routes";
-import { isAuthenticated } from "./api/middlewares";
+import { CategoryRoutes, NoteRoutes, UserRoutes, authRoutes } from "./api/routes";
+import { AuthenticateUser, errorHandler } from "./api/middlewares";
 
 
 const server: Express = express();   // create an instance of the Express application.
@@ -14,8 +14,18 @@ server.use(express.json());     // configure the server to parse JSON data in in
 server.use(cors());             // configure cross-origin resource sharing for all routes.
 server.use(cookieParser());     // configure the server to parse cookies  in incomming requests.
 
+// Routes.
 server.use("/api/auth", authRoutes);
-//server.use("/api/protected", isAuthenticated, protectedRoutes)
+
+server.use("/api/users", AuthenticateUser, UserRoutes);
+
+server.use("/api/notes", AuthenticateUser, NoteRoutes);
+
+server.use("/api/categories", AuthenticateUser, CategoryRoutes);
+
+// middle ware to handle errors.
+server.use(errorHandler);
+
 
 // connection to the database.
 db_connection()

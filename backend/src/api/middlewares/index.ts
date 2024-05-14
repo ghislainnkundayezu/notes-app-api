@@ -1,6 +1,8 @@
-import { isAuthenticated } from "./auth-middleware";
+import { AuthenticateUser } from "./auth-middleware";
+import errorHandler from "./errror-handler-middleware";
 
 
 export {
-    isAuthenticated,
+    AuthenticateUser,
+    errorHandler,
 }

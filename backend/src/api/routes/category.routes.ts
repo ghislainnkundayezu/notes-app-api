@@ -4,14 +4,16 @@ import { createCategory, deleteCategory, getCategories, updateCategoryLabel } fr
 const router = Router();
 
 
-router.post("/categories/create-category", createCategory);
+router
+    .route("/")
+    .get(getCategories)
+    .post(createCategory)
+    
 
 router
-    .route("/categories")
-    .get(getCategories)
+    .route("/:categoryId")
     .patch(updateCategoryLabel)
-    .post(createCategory)
     .delete(deleteCategory);
-
+    
 
 export default router;

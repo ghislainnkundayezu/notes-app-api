@@ -1,21 +1,26 @@
 import { Router } from "express";
-import { createNote, deleteNote, getNotes, getNotesByCategory, searchNotes, updateNoteCategory, updateNoteDetails, updateNoteStatus, updateNoteTitle } from "../controllers";
+import { createNote, deleteNote, getNote, getNotes, getNotesByCategory, searchNotes, updateNoteCategory, updateNoteDetails, updateNoteStatus, updateNoteTitle } from "../controllers";
 
 const router = Router();
 
 router
-    .route("/notes")
+    .route("/")
     .post(createNote)
     .get(getNotes)
     .get(getNotesByCategory)
+    
+
+router
+    .route("/:noteId")
+    .get(getNote)
     .delete(deleteNote);
 
-router.get("/notes/search", searchNotes);
+router.get("/search", searchNotes);
 
-router.patch("/notes/category", updateNoteCategory);
-router.patch("/notes/details", updateNoteDetails);
-router.patch("/notes/status", updateNoteStatus);
-router.patch("/notes/title", updateNoteTitle);
+router.patch("/category", updateNoteCategory);
+router.patch("/details", updateNoteDetails);
+router.patch("/status", updateNoteStatus);
+router.patch("/title", updateNoteTitle);
 
 
 

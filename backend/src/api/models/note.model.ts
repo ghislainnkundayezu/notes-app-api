@@ -14,7 +14,6 @@ const NoteSchema = new Schema<INote>({
     details: {
         type: String,
         default: "",
-        lowercase: true,
         trim: true,
     },
     createAt: {

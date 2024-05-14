@@ -3,7 +3,9 @@ import { getUser, updateUsername } from "../controllers";
 
 const router = Router();
 
-router.get("/user", getUser);
-router.patch("/user/update-username", updateUsername);
+router
+    .route("/")
+    .get(getUser)
+    .patch(updateUsername);
 
 export default router;
