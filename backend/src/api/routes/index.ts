@@ -1,6 +1,6 @@
-import authRoutes  from "./auth-routes"
-import UserRoutes from "./note.routes"
-import CategoryRoutes from "./note.routes"
+import authRoutes  from "./auth.routes"
+import UserRoutes from "./user.routes"
+import CategoryRoutes from "./category.routes"
 import NoteRoutes from "./note.routes"
 
 

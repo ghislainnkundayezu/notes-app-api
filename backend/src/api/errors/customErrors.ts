@@ -1,5 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { CustomError } from "../interfaces/errors";
+import { ValidationError } from "express-validator";
 
 export class BadRequestError extends Error implements CustomError {
     
@@ -45,11 +46,15 @@ export class UnauthenticatedError extends Error implements CustomError {
     }
 }
 
-export class ValidationError extends Error implements CustomError {
-    statusCode: number;
-    constructor(message: string) {
+export class CustomValidationError extends Error implements CustomError {
+    
+    public readonly statusCode: number;
+    public readonly errors: ValidationError[];
+
+    constructor(message: string, errors: ValidationError[]) {
         super(message);
-        this.name = "UnauthenticatedError";
-        this.statusCode = StatusCodes.UNAUTHORIZED;
+        this.name = "ValidationError";
+        this.statusCode = StatusCodes.BAD_REQUEST;
+        this.errors = errors;
     }
 }

@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { createCategory, deleteCategory, getCategories, updateCategoryLabel } from "../controllers";
+import { validateCreateCategoryInput, validateDeleteCategoryInput, validateUpdateCategoryInput } from "../validation/validation-schemas";
+import { validationHandler } from "../middlewares";
 
 const router = Router();
 
@@ -7,13 +9,13 @@ const router = Router();
 router
     .route("/")
     .get(getCategories)
-    .post(createCategory)
+    .post(validateCreateCategoryInput, validationHandler, createCategory)
     
 
 router
     .route("/:categoryId")
-    .patch(updateCategoryLabel)
-    .delete(deleteCategory);
+    .patch(validateUpdateCategoryInput, validationHandler, updateCategoryLabel)
+    .delete(validateDeleteCategoryInput, validationHandler, deleteCategory);
     
 
 export default router;

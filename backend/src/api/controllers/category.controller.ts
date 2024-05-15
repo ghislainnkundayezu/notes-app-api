@@ -1,12 +1,17 @@
 import { NextFunction, Request, Response } from "express";
 
 import { Category, Note } from "../models";
-import { HTTP_BAD_REQUEST, HTTP_CREATED, HTTP_INTERNAL_SERVER_ERROR, HTTP_NOT_FOUND, HTTP_NO_CONTENT, HTTP_OK } from "../../config/constants";
 import { NotFoundError } from "../errors/customErrors";
 import { StatusCodes } from "http-status-codes";
 
+
 /**
+ * Function to create a new category document or record in the database.
  * 
+ * @param {Request} req - the incomming request object.
+ * @param {Response} res - the outgoing request object.
+ * @param {NextFunction} next - function to pass control to the next middleware. 
+ * @returns {Promise<Response | void>} - Returns a promise that resolves with the response object or passes control to the next middleware.
  */
 export const createCategory = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     
@@ -15,13 +20,6 @@ export const createCategory = async (req: Request, res: Response, next: NextFunc
         const { userId } = req.user!;
         const { categoryLabel } = req.body;
 
-        //TODO: remember to add validation
-        if (!categoryLabel) {
-            return  res.status(HTTP_BAD_REQUEST).json({
-                success: false,
-                message: "A label for the category isn't provided.",
-            });
-        }
 
         const newCategory = new Category({ label: categoryLabel, owner: userId });
         await newCategory.save();
@@ -38,6 +36,16 @@ export const createCategory = async (req: Request, res: Response, next: NextFunc
 
 }
 
+
+
+/**
+ * Function to update the label of an existing category document or record in the database.
+ * 
+ * @param {Request} req - the incomming request object.
+ * @param {Response} res - the outgoing request object.
+ * @param {NextFunction} next - function to pass control to the next middleware. 
+ * @returns {Promise<Response | void>} - Returns a promise that resolves with the response object or passes control to the next middleware.
+ */
 export const updateCategoryLabel = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
         const { userId } = req.user!;
@@ -61,8 +69,15 @@ export const updateCategoryLabel = async (req: Request, res: Response, next: Nex
     }
 }
 
+
+
 /**
+ * Function to delete a category document or record from the database.
  * 
+ * @param {Request} req - the incomming request object.
+ * @param {Response} res - the outgoing request object.
+ * @param {NextFunction} next - function to pass control to the next middleware. 
+ * @returns {Promise<Response | void>} - Returns a promise that resolves with the response object or passes control to the next middleware.
  */
 export const deleteCategory = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     
@@ -77,15 +92,11 @@ export const deleteCategory = async (req: Request, res: Response, next: NextFunc
             { $set: { category: null } },
         );
 
-        const deleteCategory = await Category.deleteOne({ 
+        await Category.deleteOne({ 
             _id: categoryId,
             owner: userId,
         });
-
-        //if (deleteCategory.deletedCount === 0) throw new NotFoundError("Category Not Found");
         
-        
-
         res.status(StatusCodes.OK).json({
             success: true,
             message: "Category deleted successfully",
@@ -100,11 +111,12 @@ export const deleteCategory = async (req: Request, res: Response, next: NextFunc
 
 
 /**
+ * Function to get category documents or records of a particular owner or userId in the database.
  * 
- * 
- * @param req 
- * @param res 
- * @returns 
+ * @param {Request} req - the incomming request object.
+ * @param {Response} res - the outgoing request object.
+ * @param {NextFunction} next - function to pass control to the next middleware. 
+ * @returns {Promise<Response | void>} - Returns a promise that resolves with the response object or passes control to the next middleware.
  */
 export const getCategories = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     try {

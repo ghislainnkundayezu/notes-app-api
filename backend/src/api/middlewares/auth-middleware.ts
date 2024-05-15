@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import { HTTP_UNAUTHORIZED } from "../../config/constants";
 import { verifyToken } from "../helpers/jwt";
+import { UnauthorizedError } from "../errors/customErrors";
 
 interface DecodedPayload extends Object {
     userId: string,
@@ -27,11 +27,12 @@ export const AuthenticateUser= async (req: Request, res: Response, next: NextFun
         const token = req.cookies["auth-token"];
 
         if (!token) {
-            return res.status(HTTP_UNAUTHORIZED).json({
-                success: false,
-                message: "Unauthorized request: Missing authentication token",
-                error: null,
-            });
+            throw new UnauthorizedError("Unauthorized request: Missing authentication token");
+            // return res.status(HTTP_UNAUTHORIZED).json({
+            //     success: false,
+            //     message: "Unauthorized request: Missing authentication token",
+            //     error: null,
+            // });
         }
         const payload = verifyToken(token) as DecodedPayload;
         
@@ -43,12 +44,13 @@ export const AuthenticateUser= async (req: Request, res: Response, next: NextFun
 
         next();
 
-    }catch(error: any) {
-        return res.status(HTTP_UNAUTHORIZED).json({
-            success: false,
-            message: "Unauthorized request",
-            error: error.message,
-        });
+    }catch(error) {
+        next(error);
+        // return res.status(HTTP_UNAUTHORIZED).json({
+        //     success: false,
+        //     message: "Unauthorized request",
+        //     error: error.message,
+        // });
     }
 }
 

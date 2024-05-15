@@ -1,28 +1,23 @@
 import { Router } from "express";
-import { createNote, deleteNote, getNote, getNotes, getNotesByCategory, searchNotes, updateNoteCategory, updateNoteDetails, updateNoteStatus, updateNoteTitle } from "../controllers";
+import { createNote, deleteNote, getNotes, updateNote } from "../controllers";
+import { validateCreateNoteInput, validateDeleteNoteInput, validateGetNotesInput, validateUpdateNoteInput } from "../validation/validation-schemas";
+import { validationHandler } from "../middlewares";
 
 const router = Router();
 
 router
     .route("/")
-    .post(createNote)
-    .get(getNotes)
-    .get(getNotesByCategory)
-    
+    .post(validateCreateNoteInput, validationHandler, createNote)
+     
+router
+    .route("/:noteId?")
+    .get(validateGetNotesInput, validationHandler, getNotes)
+    .delete(validateDeleteNoteInput, validationHandler, deleteNote);
+
 
 router
-    .route("/:noteId")
-    .get(getNote)
-    .delete(deleteNote);
-
-router.get("/search", searchNotes);
-
-router.patch("/category", updateNoteCategory);
-router.patch("/details", updateNoteDetails);
-router.patch("/status", updateNoteStatus);
-router.patch("/title", updateNoteTitle);
-
-
+    .route("/:noteId/:fieldToUpdate")
+    .patch(validateUpdateNoteInput, validationHandler, updateNote);
 
 
 export default router;

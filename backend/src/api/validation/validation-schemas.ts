@@ -1,11 +1,9 @@
 import { body, param, query } from "express-validator";
-import { Category, User } from "../models";
-import { BadRequestError, NotFoundError, UnauthorizedError } from "../errors/customErrors";
-import mongoose from "mongoose";
-import { Request } from "express";
-import { noteIdValidator, categoryIdValidator } from "./validation-functions";
+import { noteIdValidator, categoryIdValidator, emailValidator, notePropertyValidator, usernameValidator } from "./validation-functions";
 
-//authenticaton.
+//authentication.
+
+//TODO: Remember to decide what to do with this line.
 const usernameValidateChain = () => {
     return body("username")
             .notEmpty()
@@ -13,21 +11,14 @@ const usernameValidateChain = () => {
             .isLength({min: 3})
             .withMessage("A username must be atleast 3 characters")
             .isAlphanumeric()
-            .withMessage("A Username can contain letters and numbers only.")
+            .withMessage("A Username can be one word with only letters or numbers.")
             .trim()
             .toLowerCase()
 }
 
 export const validateRegistrationInput = [
-    body("username")
-        .notEmpty()
-        .withMessage("Username is required")
-        .isLength({min: 3})
-        .withMessage("A username must be atleast 3 characters")
-        .isAlphanumeric()
-        .withMessage("A Username can contain letters and numbers only.")
-        .trim()
-        .toLowerCase(),
+    usernameValidateChain()
+    .custom(usernameValidator),
 
     body("email")
         .notEmpty()
@@ -35,13 +26,7 @@ export const validateRegistrationInput = [
         .isEmail()
         .withMessage("Invalid Email Format")
         .trim()
-        .custom(async (email) => {
-            const emailExists = await User.findOne({ email: email });
-            
-            if (emailExists) {
-                throw new BadRequestError("Email Already Exists");
-            }   
-        }),
+        .custom(emailValidator),
     
     body("password")
     .notEmpty()
@@ -53,15 +38,7 @@ export const validateRegistrationInput = [
 ];
 
 export const validateLoginInput = [
-    body("username")
-        .notEmpty()
-        .withMessage("Username is required")
-        .isLength({min: 3})
-        .withMessage("A username must be atleast 3 characters")
-        .isAlphanumeric()
-        .withMessage("A Username can contain letters and numbers only.")
-        .trim()
-        .toLowerCase(),
+    usernameValidateChain(),
 
     body("email")
         .notEmpty()
@@ -82,15 +59,8 @@ export const validateLoginInput = [
 
 //users.
 export const validateUpdateUsernameInput = [
-    body("username")
-        .notEmpty()
-        .withMessage("A Username is required")
-        .isLength({min: 3})
-        .withMessage("A username must be atleast 3 characters")
-        .isAlphanumeric()
-        .withMessage("A Username can contain letters and numbers only.")
-        .trim()
-        .toLowerCase(),
+    usernameValidateChain()
+    .custom(usernameValidator),
 
 ];
 
@@ -137,8 +107,8 @@ export const validateCreateNoteInput = [
     body("title")
         .notEmpty()
         .withMessage("A title is required")
-        .isAlphanumeric()
-        .withMessage("A title can contain only letters and numbers")
+        .isString()
+        .withMessage("A title can contain must be a string")
         .toLowerCase()
         .trim(),
 
@@ -150,21 +120,13 @@ export const validateCreateNoteInput = [
         .trim(),
 
     body("categoryId")
-        .notEmpty()
-        .withMessage("A category Id is required")
+        .optional()
         .trim()
         .custom(categoryIdValidator)
 ];
 
-export const validateGetNoteInput = [
-    param("noteId")
-        .notEmpty()
-        .withMessage("A note id is required")
-        .trim()
-        .custom(noteIdValidator)
-];
 
-export const getNotesInput = [
+export const validateGetNotesInput = [
     query("categoryId")
         .optional()
         .trim()
@@ -174,10 +136,15 @@ export const getNotesInput = [
         .optional()
         .isAlphanumeric()
         .withMessage("A query can container letters and numbers only"),
+
+    param("noteId")
+        .optional()
+        .trim()
+        .custom(noteIdValidator),
         
 ];
 
-export const updateNote = [
+export const validateUpdateNoteInput = [
     param("noteId")
         .notEmpty()
         .withMessage("A note id is required")
@@ -187,19 +154,17 @@ export const updateNote = [
     param("fieldToUpdate")
         .notEmpty()
         .withMessage("A note id is required")
-        .trim(),
-        //.custom(fieldValidator),
+        .trim()
+        .toLowerCase()
+        .custom(notePropertyValidator),
 
     body("newValue")
         .notEmpty()
-        .withMessage("A note id is required")
+        .withMessage("A new value required is required")
         .trim()
-        .custom(noteIdValidator),
+        .escape()
 ];
 
-
-
-export const updateNoteCategory = [];
 
 export const validateDeleteNoteInput = [
     param("noteId")
