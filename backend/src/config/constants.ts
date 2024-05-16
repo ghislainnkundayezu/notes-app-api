@@ -9,7 +9,7 @@ const DATABASE_COLLECTION = process.env.DATABASE_COLLECTION;
 const DATABASE_URL: string = process.env.DATABASE_URL!;
 const JWT_SECRET = process.env.JWT_SECRET;
 
-const cookieDuration = 20 * 60 * 1000;
+const cookieDuration = 60 * 60 * 1000;
 const cookieOptions: CookieOptions  = {
   secure: true,
   httpOnly: true, 

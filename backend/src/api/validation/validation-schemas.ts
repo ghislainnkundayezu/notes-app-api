@@ -1,9 +1,13 @@
 import { body, param, query } from "express-validator";
-import { noteIdValidator, categoryIdValidator, emailValidator, notePropertyValidator, usernameValidator } from "./validation-functions";
+import { noteIdValidator, categoryIdValidator, emailValidator, notePropertyValidator, usernameValidator, queryParamValidator } from "./validators";
 
-//authentication.
+// authentication.
 
-//TODO: Remember to decide what to do with this line.
+/**
+ *  Validation chain of Username. 
+ * 
+ * @returns {Array} - An array of validation rules.
+ */
 const usernameValidateChain = () => {
     return body("username")
             .notEmpty()
@@ -16,6 +20,11 @@ const usernameValidateChain = () => {
             .toLowerCase()
 }
 
+/**
+ *  Validation chain of data for User Registration. 
+ * 
+ * @returns {Array} - An array of validation rules.
+*/
 export const validateRegistrationInput = [
     usernameValidateChain()
     .custom(usernameValidator),
@@ -37,6 +46,11 @@ export const validateRegistrationInput = [
 
 ];
 
+/** 
+ * Validation chain of data for User Login. 
+ * 
+ * @returns {Array} - An array of validation rules.
+*/
 export const validateLoginInput = [
     usernameValidateChain(),
 
@@ -58,6 +72,11 @@ export const validateLoginInput = [
 
 
 //users.
+/**
+ *  Validation chain of data for updating a username. 
+ * 
+ * @returns {Array} - An array of validation rules.
+*/
 export const validateUpdateUsernameInput = [
     usernameValidateChain()
     .custom(usernameValidator),
@@ -65,8 +84,13 @@ export const validateUpdateUsernameInput = [
 ];
 
 //categories.
+/**
+ *  Validation chain of data for creating a category. 
+ * 
+ * @returns {Array} - An array of validation rules.
+*/
 export const validateCreateCategoryInput = [
-    body("categoryLabel")
+    body("label")
         .notEmpty()
         .withMessage("A label for the category is required")
         .isAlphanumeric()
@@ -76,7 +100,11 @@ export const validateCreateCategoryInput = [
         
 ];
 
-
+/**
+ *  Validation chain of data for updating the label of a category. 
+ * 
+ * @returns {Array} - An array of validation rules.
+*/
 export const validateUpdateCategoryInput = [
     param("categoryId")
         .notEmpty()
@@ -92,6 +120,12 @@ export const validateUpdateCategoryInput = [
         .toLowerCase()
 ];
 
+/** 
+ * 
+ * Validation chain of data for deleting a category.
+ * 
+ * @returns {Array} - An array of validation rules.
+ */
 export const validateDeleteCategoryInput = [
     param("categoryId")
         .notEmpty()
@@ -102,7 +136,11 @@ export const validateDeleteCategoryInput = [
 
 
 // notes.
- 
+/**
+ *  Validation chain of data for creating a note.
+ * 
+ * @returns {Array} - An array of validation rules.
+ */
 export const validateCreateNoteInput = [
     body("title")
         .notEmpty()
@@ -126,16 +164,31 @@ export const validateCreateNoteInput = [
 ];
 
 
+/** 
+ * Validation chain of a data for getting or searching notes.
+ * 
+ * @returns {Array} - An array of validation rules.
+ */
 export const validateGetNotesInput = [
+    query()
+    .custom(queryParamValidator),
+
     query("categoryId")
         .optional()
         .trim()
         .custom(categoryIdValidator),
     
-    query("search")
+    query("title")
         .optional()
-        .isAlphanumeric()
+        .matches(/^[\w\s]+$/)
         .withMessage("A query can container letters and numbers only"),
+        
+
+    query("details")
+        .optional()
+        .isString()
+        .withMessage("Details can only be a string."),
+        
 
     param("noteId")
         .optional()
@@ -144,6 +197,12 @@ export const validateGetNotesInput = [
         
 ];
 
+
+/** 
+ * Validation chain of data for updating info about a note. 
+ * 
+ * @returns {Array} - An array of validation rules.
+ */
 export const validateUpdateNoteInput = [
     param("noteId")
         .notEmpty()
@@ -166,10 +225,15 @@ export const validateUpdateNoteInput = [
 ];
 
 
+/** 
+ * Validation chain of of data for deleting a note. 
+ * 
+ * @returns {Array} - An array of validation rules.
+ */
 export const validateDeleteNoteInput = [
     param("noteId")
         .notEmpty()
         .withMessage("A note id is required")
         .trim()
-        .custom(noteIdValidator) 
+        .custom(noteIdValidator)
 ];

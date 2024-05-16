@@ -2,17 +2,25 @@ import { Types } from "mongoose";
 import { BadRequestError, NotFoundError, UnauthorizedError } from "../errors/customErrors";
 import { Category, Note, User } from "../models";
 import { CustomValidator, Meta } from "express-validator";
+import { NextFunction } from "express";
 
-
+/**
+ * Checks if a username doesn't already exist in the database.
+ * 
+ * @param username - An alphanumeric string.
+ */
 export const usernameValidator: CustomValidator = async (username: string) => {
     const usernameExists = await User.findOne({ username: username });
-    console.log(usernameExists)
     if (usernameExists) {
         throw new BadRequestError("Username is taken.");
     }   
 }
 
-
+/**
+ * Checks if an email doesn't already exist in the database.
+ * 
+ * @param email 
+ */
 export const emailValidator: CustomValidator = async (email: string) => {
     const emailExists = await User.findOne({ email: email });
     
@@ -21,6 +29,18 @@ export const emailValidator: CustomValidator = async (email: string) => {
     }   
 }
 
+/**
+ * Checks if a category Id is valid.
+ * 
+ * It performs the following checks:
+ * 
+ * It checks if the category Id is a valid mongo DB Object Id.
+ * It checks if the category Id is in the database.
+ * It checks if the user Id in the request is the owner of the category Id. 
+ * 
+ * @param {string} categoryId 
+ * @param {Meta} param1 - An object containing the req objext
+ */
 export const categoryIdValidator: CustomValidator = async (
     categoryId: string, { req }: Meta
 ) => {
@@ -35,13 +55,26 @@ export const categoryIdValidator: CustomValidator = async (
     });
 
     if(!category) throw new NotFoundError("Category Not Found");
-
-    const isOwner = category.owner === userId as unknown as Types.ObjectId;
+   
+    const isOwner = category.owner.equals(Types.ObjectId.createFromHexString(userId));
 
     if (!isOwner) throw new UnauthorizedError("You're not authorized to perform this action");
 
 }
 
+
+/**
+ * Checks if a note Id is valid.
+ * 
+ * It performs the following checks:
+ * 
+ * It checks if the note Id is a valid mongo DB Object Id.
+ * It checks if the note Id is in the database.
+ * It checks if the user Id in the request is the owner of the note Id. 
+ *  
+ * @param noteId 
+ * @param param1 
+ */
 export const noteIdValidator: CustomValidator = async (
     noteId: string, { req }: Meta
 ) => {
@@ -63,12 +96,23 @@ export const noteIdValidator: CustomValidator = async (
 
 }
 
+/**
+ * Checks if a category Id is valid.
+ * 
+ * It performs the following checks:
+ * 
+ * It checks if the category Id is a valid mongo DB Object Id.
+ * It checks if the category Id is in the database.
+ * It checks if the user Id in the request is the owner of the category Id. 
+ *  
+ * @param fieldToUpdate 
+ * @param param1 
+ */
 export const notePropertyValidator: CustomValidator = async (
     fieldToUpdate: string, { req, location, path }: Meta
 ) => {
-    const { userId } = req.user!;
+    
     const { newValue } = req.body;
-    const { noteId }  = req.params!;
 
     const allowedFields = ["title", "details", "category", "status"];
 
@@ -78,15 +122,8 @@ export const notePropertyValidator: CustomValidator = async (
         );
     }
 
-    const isOwner = await Category.findOne({
-        _id: noteId, 
-        owner: userId 
-    })
-
-    if (!isOwner) throw new UnauthorizedError("You're not authorized to perform this action");
-
     if (fieldToUpdate === "category" && newValue !== null) {
-            categoryIdValidator(newValue, { req, location, path});
+        await categoryIdValidator(newValue, { req, location, path});
     }
 
     if (fieldToUpdate === "status") {
@@ -101,3 +138,22 @@ export const notePropertyValidator: CustomValidator = async (
     }
 }
 
+
+export const queryParamValidator: CustomValidator = async (
+   value: string, { req, location, path }: Meta
+) => {
+    const validQueryParams = ["title", "details", "categoryId"]
+    const queries = req.query && Object.keys(req.query);
+
+    console.log("Location: ", location);
+    //console.log("Request: ", req)
+    console.log("Path: ", path)
+    console.log("Value: ", value)
+    console.log(queries);
+    //console.log("Request: ", req)
+    queries?.forEach(query => {
+        if (!validQueryParams.includes(query)) {
+            throw new BadRequestError("Invalid query parameter names: Parameters can either be title, details or categoryId");
+        }
+    });
+}

@@ -28,11 +28,6 @@ export const AuthenticateUser= async (req: Request, res: Response, next: NextFun
 
         if (!token) {
             throw new UnauthorizedError("Unauthorized request: Missing authentication token");
-            // return res.status(HTTP_UNAUTHORIZED).json({
-            //     success: false,
-            //     message: "Unauthorized request: Missing authentication token",
-            //     error: null,
-            // });
         }
         const payload = verifyToken(token) as DecodedPayload;
         
@@ -46,11 +41,6 @@ export const AuthenticateUser= async (req: Request, res: Response, next: NextFun
 
     }catch(error) {
         next(error);
-        // return res.status(HTTP_UNAUTHORIZED).json({
-        //     success: false,
-        //     message: "Unauthorized request",
-        //     error: error.message,
-        // });
     }
 }
 

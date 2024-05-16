@@ -16,6 +16,7 @@ const NoteSchema = new Schema<INote>({
         default: "",
         trim: true,
     },
+    
     createAt: {
         type: Date,
         required: true,

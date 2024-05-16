@@ -18,10 +18,10 @@ export const createCategory = async (req: Request, res: Response, next: NextFunc
     try {    
 
         const { userId } = req.user!;
-        const { categoryLabel } = req.body;
+        const { label } = req.body;
 
 
-        const newCategory = new Category({ label: categoryLabel, owner: userId });
+        const newCategory = new Category({ label: label, owner: userId });
         await newCategory.save();
 
         return res.status(StatusCodes.CREATED).json({
@@ -88,7 +88,7 @@ export const deleteCategory = async (req: Request, res: Response, next: NextFunc
 
         // let's first remove the category from the notes.
         await Note.updateMany(
-            { userId, category: categoryId },
+            { owner: userId, category: categoryId },
             { $set: { category: null } },
         );
 

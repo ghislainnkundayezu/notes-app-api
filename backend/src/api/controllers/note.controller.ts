@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import { Note } from "../models";
 import { NotFoundError } from "../errors/customErrors";
 import { StatusCodes } from "http-status-codes";
-import { QueryOptions } from "mongoose";
+import mongoose, { Document, MongooseError, QueryOptions, UpdateWriteOpResult } from "mongoose";
 import { INote } from "../interfaces/Schemas";
 
 
@@ -61,7 +61,7 @@ export const getNotes = async (req: Request, res: Response, next: NextFunction):
     try {
         const { userId } = req.user!;
         const { noteId } = req.params;
-        const { categoryId, search } = req.query;
+        const { categoryId, title, details } = req.query;
         
         let query: QueryOptions<INote> = {};
 
@@ -72,24 +72,25 @@ export const getNotes = async (req: Request, res: Response, next: NextFunction):
             query.category = categoryId;
         }
 
-        if (search) {
-            query.title = {$regex: search, $options: "i"};
+        if (title) {
+            query.title = {$regex: title, $options: "i"};
+        }
+
+        if(details) {
+            query.details = {$regex: details, $options: "i"}
         }
 
         if (noteId) {
             query._id = noteId;
         } 
 
-        console.log(query)
-
         const notes = await Note.find(query)
                                         .select("-owner -__v")
                                         .populate({
                                             path: 'category',
-                                            select: "title -_id"
+                                            select: "label -_id"
                                         });
 
-        console.log(notes);
 
         if (notes.length === 0) throw new NotFoundError("Notes not found.")
              
@@ -120,13 +121,15 @@ export const updateNote = async (req: Request, res: Response, next: NextFunction
         const { userId } = req.user!;
         const { noteId, fieldToUpdate } = req.params;
         const { newValue } = req.body;
-
+        
         const note = await Note.updateOne(
             { _id: noteId, owner: userId },
-            { $set: { [fieldToUpdate]: newValue } }
-        );
+            { $set: { [fieldToUpdate]: newValue } },
+        )
+        
+        console.log("Matched: ", note.matchedCount, " Modified", note.modifiedCount)
 
-        // TODo: Remember to delete this.
+         //TODo: Remember to delete this.
         if (note.matchedCount === 0) throw new NotFoundError("Note not found");
 
         if (note.modifiedCount === 0) throw new Error("No document was updated");

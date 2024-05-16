@@ -13,7 +13,7 @@ const generateToken = (payload: JwtPayload): string => {
         const token = jwt.sign(
             payload, 
             JWT_SECRET!, 
-            { expiresIn: "10m", }
+            { expiresIn: "60m", }
         );
 
         return token;
