@@ -7,6 +7,7 @@ import { getUser, updateUsername } from "./user.controller";
 
 
 export {
+    
     registerUser,
     loginUser,
     logoutUser,

@@ -2,7 +2,13 @@ import { NextFunction, Request, Response } from "express";
 import { CustomError } from "../interfaces/errors";
 import { StatusCodes } from "http-status-codes";
 
-
+/**
+ * 
+ * @param error 
+ * @param req 
+ * @param res 
+ * @param next 
+ */
 const errorHandler = (error: CustomError, req: Request, res: Response, next: NextFunction) => {
     
     console.error(error);
@@ -17,7 +23,7 @@ const errorHandler = (error: CustomError, req: Request, res: Response, next: Nex
         success: false,
         title: name,
         description: message,
-        errors: errors,
+        details: errors,
     });
 }   
 

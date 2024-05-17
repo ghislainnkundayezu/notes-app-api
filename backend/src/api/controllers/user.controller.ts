@@ -56,8 +56,6 @@ export const updateUsername = async (req: Request, res: Response, next: NextFunc
             { $set: {username: newUsername } }
         );
         
-        console.log(user)
-
         if (!user.acknowledged) throw new Error("The database sever failed to acknowledge the change.");
 
         if (user.matchedCount === 0) throw new NotFoundError("User Not Found.");

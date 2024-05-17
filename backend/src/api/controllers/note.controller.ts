@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import { Note } from "../models";
 import { NotFoundError } from "../errors/customErrors";
 import { StatusCodes } from "http-status-codes";
-import mongoose, { Document, MongooseError, QueryOptions, UpdateWriteOpResult } from "mongoose";
+import { QueryOptions } from "mongoose";
 import { INote } from "../interfaces/Schemas";
 
 
@@ -127,7 +127,6 @@ export const updateNote = async (req: Request, res: Response, next: NextFunction
             { $set: { [fieldToUpdate]: newValue } },
         )
         
-        console.log("Matched: ", note.matchedCount, " Modified", note.modifiedCount)
 
          //TODo: Remember to delete this.
         if (note.matchedCount === 0) throw new NotFoundError("Note not found");
@@ -166,7 +165,7 @@ export const deleteNote = async (req: Request, res: Response, next: NextFunction
         
         const deletedNote = await Note.deleteOne({_id: noteId, owner: userId});
 
-        //if (deletedNote.deletedCount === 0) throw new Error("Note not found.")
+        if (deletedNote.deletedCount === 0) throw new Error("Note not found.")
 
         return res.status(StatusCodes.NO_CONTENT).send();
 

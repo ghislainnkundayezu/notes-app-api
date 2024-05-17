@@ -2,7 +2,7 @@ import { Types } from "mongoose";
 import { BadRequestError, NotFoundError, UnauthorizedError } from "../errors/customErrors";
 import { Category, Note, User } from "../models";
 import { CustomValidator, Meta } from "express-validator";
-import { NextFunction } from "express";
+
 
 /**
  * Checks if a username doesn't already exist in the database.
@@ -97,13 +97,10 @@ export const noteIdValidator: CustomValidator = async (
 }
 
 /**
- * Checks if a category Id is valid.
  * 
- * It performs the following checks:
  * 
- * It checks if the category Id is a valid mongo DB Object Id.
- * It checks if the category Id is in the database.
- * It checks if the user Id in the request is the owner of the category Id. 
+ *
+ *
  *  
  * @param fieldToUpdate 
  * @param param1 
@@ -138,19 +135,17 @@ export const notePropertyValidator: CustomValidator = async (
     }
 }
 
-
+/**
+ * 
+ * @param value 
+ * @param param1 
+ */
 export const queryParamValidator: CustomValidator = async (
    value: string, { req, location, path }: Meta
 ) => {
     const validQueryParams = ["title", "details", "categoryId"]
     const queries = req.query && Object.keys(req.query);
 
-    console.log("Location: ", location);
-    //console.log("Request: ", req)
-    console.log("Path: ", path)
-    console.log("Value: ", value)
-    console.log(queries);
-    //console.log("Request: ", req)
     queries?.forEach(query => {
         if (!validQueryParams.includes(query)) {
             throw new BadRequestError("Invalid query parameter names: Parameters can either be title, details or categoryId");
