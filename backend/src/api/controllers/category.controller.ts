@@ -56,7 +56,7 @@ export const updateCategoryLabel = async (req: Request, res: Response, next: Nex
             { _id: categoryId, owner: userId },
             { $set: { label: newLabel } }
         );
-
+        console.log(category)
         if (category.modifiedCount === 0) {
             throw new Error("Failed to update the label");
         }

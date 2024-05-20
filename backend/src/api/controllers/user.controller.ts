@@ -47,19 +47,17 @@ export const getUser = async (req: Request, res: Response, next: NextFunction): 
  */
 export const updateUsername = async (req: Request, res: Response, next: NextFunction ): Promise<Response | void> => {
     try {
-        const { userId } = req.user!;
+        const { userId, userEmail } = req.user!;
 
-        const { newUsername } = req.body;
-
+        const { username } = req.body;
+        
         const user = await User.updateOne(
-            { _id: userId },
-            { $set: {username: newUsername } }
+            { _id: userId, email: userEmail },
+            { $set: { username: username } },
         );
         
-        if (!user.acknowledged) throw new Error("The database sever failed to acknowledge the change.");
-
         if (user.matchedCount === 0) throw new NotFoundError("User Not Found.");
-
+        
         if (user.modifiedCount === 0) throw new Error("No document was updated");
         
         return res.status(StatusCodes.NO_CONTENT).send();

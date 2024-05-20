@@ -11,7 +11,7 @@ import { StatusCodes } from "http-status-codes";
  */
 const errorHandler = (error: CustomError, req: Request, res: Response, next: NextFunction) => {
     
-    console.error(error);
+    //console.error(error);
     
     const statusCode = error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
     const message = error.message || "There is a problem with the server";
