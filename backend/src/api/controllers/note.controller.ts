@@ -37,7 +37,7 @@ export const createNote = async (req: Request, res: Response, next: NextFunction
         
         return res.status(StatusCodes.CREATED).json({
             success: true,
-            message: "A Note was successfully created.",
+            message: "A note was successfully created.",
         });
 
     }catch(error: any) {

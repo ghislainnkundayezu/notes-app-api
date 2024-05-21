@@ -1,7 +1,7 @@
 import request from "supertest";
 
 
-import { Category, User } from "../models";
+import { Category, Note, User } from "../models";
 import server from "../../config/server";
 
 export const createUser = async () => {
@@ -19,18 +19,6 @@ export const createUser = async () => {
     return { userId, userEmail }
 }
 
-export const loginUser = async (userId: string, userEmail: string) => {
-    const user = await User.findOne({_id: userId, email: userEmail});
-    if(!user) { return;}
-    const loginResponse = await request(server)
-        .post('/api/auth/login')
-        .send({username: user.username, email: userEmail, password: user.password  });
-      // @ts-ignore
-    const authToken: string = loginResponse.headers['set-cookie'].find(cookie => cookie.includes('auth-token')).split('=')[1];
-    
-    
-    return authToken;
-}
 
 
 export const createTestCategory = async (owner: string) => {
@@ -47,4 +35,20 @@ export const createTestCategory = async (owner: string) => {
     const categoryId = testCategory._id;
 
     return categoryId;
+}
+
+export const createTestNote = async (owner: string) => {
+
+    const userId = owner;
+
+    const testNote = new Note({
+        title: "Good",
+        owner: userId,
+    })
+
+    await testNote.save();
+
+    const noteId = testNote._id;
+
+    return noteId;
 }

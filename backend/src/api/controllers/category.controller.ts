@@ -56,7 +56,7 @@ export const updateCategoryLabel = async (req: Request, res: Response, next: Nex
             { _id: categoryId, owner: userId },
             { $set: { label: newLabel } }
         );
-        console.log(category)
+     
         if (category.modifiedCount === 0) {
             throw new Error("Failed to update the label");
         }
@@ -97,10 +97,9 @@ export const deleteCategory = async (req: Request, res: Response, next: NextFunc
             owner: userId,
         });
         
-        res.status(StatusCodes.OK).json({
-            success: true,
-            message: "Category deleted successfully",
-        });
+        return res.status(StatusCodes.NO_CONTENT).send();
+
+        
     
     }catch(error) {
         
