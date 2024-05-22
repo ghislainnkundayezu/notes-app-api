@@ -67,7 +67,6 @@ export const getNotes = async (req: Request, res: Response, next: NextFunction):
 
         query.owner = userId;
 
-
         if (categoryId) {
             query.category = categoryId;
         }
@@ -92,8 +91,9 @@ export const getNotes = async (req: Request, res: Response, next: NextFunction):
                                         });
 
 
-        if (notes.length === 0) throw new NotFoundError("Notes not found.")
-             
+        if (notes.length === 0){
+            return res.status(StatusCodes.NO_CONTENT).send()
+        }
 
         return res.status(StatusCodes.OK).json({
             success: true,

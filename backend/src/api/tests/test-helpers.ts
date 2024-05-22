@@ -14,7 +14,7 @@ export const createUser = async () => {
       await testUser.save();
 
     const userId = testUser._id;
-    const userEmail = testUser._id;
+    const userEmail = testUser.email;
 
     return { userId, userEmail }
 }
@@ -40,7 +40,6 @@ export const createTestCategory = async (owner: string) => {
 export const createTestNote = async (owner: string) => {
 
     const userId = owner;
-
     const testNote = new Note({
         title: "Good",
         owner: userId,
@@ -49,6 +48,6 @@ export const createTestNote = async (owner: string) => {
     await testNote.save();
 
     const noteId = testNote._id;
-
+    
     return noteId;
 }

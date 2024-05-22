@@ -14,7 +14,7 @@ const testUserData = {
 
 
 
-describe.skip("Users", () => {
+describe("Users", () => {
 
     beforeAll(async () => {
         const mongoServer = await MongoMemoryServer.create();
@@ -27,20 +27,21 @@ describe.skip("Users", () => {
         await mongoose.connection.close()
     })
 
+    describe("Given that the user is logged in", () => {
+        let authToken: string;
+        
+        beforeEach(async () => {
+            const payload  = await createUser();
+            authToken = generateToken(payload)
+        })
 
-    describe("GET /api/users", () => {
-        describe("Given that the user is logged in", () => {
-            let authToken: string;
-            beforeAll(async () => {
-                const payload  = await createUser();
-                authToken = generateToken(payload)
-            })
-            afterAll(async () => {
-                await mongoose.connection.dropDatabase();
-            })
+        afterEach(async () => {
+            await mongoose.connection.dropDatabase();
+        })
 
-            // @ts-ignore
-            it("Responds with a json message", async () => {
+        describe("GET /api/users", () => {
+
+            test("it should respond with a json message", async () => {
                 const response = await request(server)
                                         .get("/api/users")
                                         .set("Cookie", `auth-token=${authToken}`)
@@ -51,59 +52,45 @@ describe.skip("Users", () => {
             }) 
         })
 
-        describe("Given that the user is not logged in", () => {
-            it("Responds with a json message", async () => {
-                const response = await request(server)
-                                        .get("/api/users")
-                                        .expect(StatusCodes.UNAUTHORIZED)
-            })
+       
+        describe("PATCH /api/users", () => {
+                describe("Given that the new username is valid", () => {
+                    test("Responds with a json message", async () => {
+                        const response = await request(server)
+                                            .patch("/api/users")
+                                            .set("Cookie", `auth-token=${authToken}`)
+                                            .send({"username": "tests"})
+                                            .expect(StatusCodes.NO_CONTENT)
+                    })
+                })
+    
+                describe("Given that the new username isnot valid", () => {
+                    test("Responds with an error", async () => {
+                        const response = await request(server)
+                                            .patch("/api/users")
+                                            .set("Cookie", `auth-token=${authToken}`)
+                                            .send({"username": "invalid username"})
+                                            .expect(StatusCodes.BAD_REQUEST)
+                    })
+                })
         })
-
           
     })
 
-    describe("PATCH /api/users", () => {
-    
-        describe("Given that the user is logged in", () => {
-            let authToken: string;
-            beforeAll(async () => {
-                const payload  = await createUser();
-                authToken = generateToken(payload)
-            })
-            afterAll(async () => {
-                await mongoose.connection.dropDatabase();
-            })
-
-            describe("Given that the new username is valid", () => {
-                it("Responds with a json message", async () => {
-                    const response = await request(server)
-                                        .patch("/api/users")
-                                        .set("Cookie", `auth-token=${authToken}`)
-                                        .send({"username": "tests"})
-                                        .expect(StatusCodes.NO_CONTENT)
-                })
-            })
-
-            describe("Given that the new username isnot valid", () => {
-                it("Responds with an error", async () => {
-                    const response = await request(server)
-                                        .patch("/api/users")
-                                        .set("Cookie", `auth-token=${authToken}`)
-                                        .send({"username": "invalid username"})
-                                        .expect(StatusCodes.BAD_REQUEST)
-                })
-            })
+    describe("Given that the user is not logged in", () => {
+        test("Responds with an error message", async () => {
+                const response = await request(server)
+                                        .get("/api/users")
+                                        .expect(StatusCodes.UNAUTHORIZED)
+                    
+                expect(response.body).toHaveProperty("success")
+                expect(response.body["success"]).toBe(false)
+                expect(response.body["title"]).toEqual("UnauthenticatedError")
         })
 
-        describe("Given that the user is not logged in", () => {
-            test("Responds with an error message", async () => {
-                    const response = await request(server)
-                                            .patch("/api/users")
-                                            .send({"username": "good"})
-                                            .expect(StatusCodes.UNAUTHORIZED)
-            })
 
-        })
+
     })
 
 })
+

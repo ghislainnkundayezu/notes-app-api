@@ -75,7 +75,7 @@ describe("Categories", () => {
 
             beforeEach(async () => {
                 categoryId = await createTestCategory(userId);
-                const category = await Category.find({_id: categoryId});
+                
             });
 
             afterEach(async () => {
@@ -220,3 +220,4 @@ describe("Categories", () => {
     })
 
 })
+

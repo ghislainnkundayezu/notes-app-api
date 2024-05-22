@@ -22,7 +22,7 @@ const loginSuccessMessage = {
     message: "User Login Succeeded",
 }
 
-describe.skip("User Authentication", () => {
+describe("User Authentication", () => {
 
     beforeAll(async () => {
         const mongoServer = await MongoMemoryServer.create();

@@ -15,7 +15,7 @@ const welcomeMessage = {
     "status": "ok",
 }
 
-describe.skip("", () => {
+describe("", () => {
     
     describe("GET /", () => {
     
