@@ -1,15 +1,11 @@
-import request from "supertest";
+import { Category, Note, User } from "../src/api/models";
 
-
-import { Category, Note, User } from "../models";
-import server from "../../config/server";
 
 export const createUser = async () => {
     const testUser = new User({
         username: "test",
         email: 'test@example.com',
         password: 'password123',
-        // Add any other necessary user data
       });
       await testUser.save();
 

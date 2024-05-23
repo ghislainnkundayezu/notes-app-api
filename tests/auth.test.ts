@@ -1,7 +1,7 @@
 import request from "supertest"
 import { MongoMemoryServer } from "mongodb-memory-server";
 
-import server from "../../config/server"
+import server from "../src/config/server"
 import { StatusCodes } from "http-status-codes"
 import mongoose from "mongoose";
 

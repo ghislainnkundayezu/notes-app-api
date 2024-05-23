@@ -6,6 +6,7 @@ import { StatusCodes } from "http-status-codes"
 import { Request, Response } from "express"
 
 const welcomeMessage = (req: Request, res: Response) => {
+    
     res.status(StatusCodes.OK).json({
         "name": "My API",
         "version": "v1",

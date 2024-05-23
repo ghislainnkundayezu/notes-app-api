@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes"
-import server from "../../config/server"
+import server from "../src/config/server"
 import request from "supertest"
 
 const welcomeMessage = {

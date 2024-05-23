@@ -3,9 +3,9 @@ import request from "supertest";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { StatusCodes } from "http-status-codes";
 
-import server from "../../config/server";
+import server from "../src/config/server";
 import { createTestNote, createUser } from "./test-helpers";
-import { generateToken } from "../helpers/jwt";
+import { generateToken } from "../src/api/helpers/jwt";
 
 
 describe("Notes", () => {
@@ -200,6 +200,6 @@ describe("Notes", () => {
                                 .post("/api/notes")
                                 .send({"label": "Important"})
                                 .expect(StatusCodes.UNAUTHORIZED)   
-            })
-    })
-})
+            });
+    });
+});

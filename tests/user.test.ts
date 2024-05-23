@@ -2,9 +2,9 @@ import request from "supertest"
 import { MongoMemoryServer } from "mongodb-memory-server"
 import { StatusCodes } from "http-status-codes"
 import mongoose from "mongoose"
-import server from "../../config/server"
+import server from "../src/config/server"
 import { createUser } from "./test-helpers"
-import { generateToken } from "../helpers/jwt"
+import { generateToken } from "../src/api/helpers/jwt"
 
 
 const testUserData = {
@@ -23,9 +23,9 @@ describe("Users", () => {
     });
 
     afterAll(async () => {
-        await mongoose.disconnect()
-        await mongoose.connection.close()
-    })
+        await mongoose.disconnect();
+        await mongoose.connection.close();
+    });
 
     describe("Given that the user is logged in", () => {
         let authToken: string;
@@ -33,11 +33,11 @@ describe("Users", () => {
         beforeEach(async () => {
             const payload  = await createUser();
             authToken = generateToken(payload)
-        })
+        });
 
         afterEach(async () => {
             await mongoose.connection.dropDatabase();
-        })
+        });
 
         describe("GET /api/users", () => {
 
@@ -48,9 +48,13 @@ describe("Users", () => {
                                         .expect(StatusCodes.OK)
                                         .expect("Content-Type", /json/)
                 
-                expect(response.body).toEqual({"data": {...testUserData}, "message": "User Found", "success": true})
-            }) 
-        })
+                expect(response.body).toEqual({
+                    "data": {...testUserData}, 
+                    "message": "User Found", 
+                    "success": true
+                });
+            }); 
+        });
 
        
         describe("PATCH /api/users", () => {
@@ -73,9 +77,8 @@ describe("Users", () => {
                                             .expect(StatusCodes.BAD_REQUEST)
                     })
                 })
-        })
-          
-    })
+        });   
+    });
 
     describe("Given that the user is not logged in", () => {
         test("Responds with an error message", async () => {
@@ -86,11 +89,7 @@ describe("Users", () => {
                 expect(response.body).toHaveProperty("success")
                 expect(response.body["success"]).toBe(false)
                 expect(response.body["title"]).toEqual("UnauthenticatedError")
-        })
-
-
-
-    })
-
-})
+        });
+    });
+});
 

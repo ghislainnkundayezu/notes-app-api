@@ -2,11 +2,11 @@ import request from "supertest"
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 import { createUser } from "./test-helpers";
-import server from "../../config/server";
+import server from "../src/config/server";
 import { StatusCodes } from "http-status-codes";
 import { createTestCategory } from "./test-helpers";
-import { Category } from "../models";
-import { generateToken } from "../helpers/jwt";
+import { Category } from "../src/api/models";
+import { generateToken } from "../src/api/helpers/jwt";
 
 describe("Categories", () => {
     

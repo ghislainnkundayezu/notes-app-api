@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "npx nodemon ./src/index.ts",
-    "test": "jest --detectOpenHandles --watch --onlyChanged"
+    "test": "jest --detectOpenHandles --coverage"
   },
   "author": "Ghislain Nkundayezu",
   "license": "ISC",
