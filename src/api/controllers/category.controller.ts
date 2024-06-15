@@ -21,7 +21,10 @@ export const createCategory = async (req: Request, res: Response, next: NextFunc
         const { label } = req.body;
 
 
-        const newCategory = new Category({ label: label, owner: userId });
+        const newCategory = new Category({ 
+            label: label, 
+            owner: userId 
+        });
         await newCategory.save();
 
         return res.status(StatusCodes.CREATED).json({
