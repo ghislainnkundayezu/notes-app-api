@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { BadRequestError, NotFoundError, UnauthorizedError } from "../errors/customErrors";
+import { BadRequestError, CustomValidationError, NotFoundError, UnauthorizedError } from "../errors/customErrors";
 import { Category, Note, User } from "../models";
 import { CustomValidator, Meta } from "express-validator";
 

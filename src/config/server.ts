@@ -8,7 +8,7 @@ const server: Express = express();   // create an instance of the Express applic
 
 server.use(express.json());     // configure the server to parse JSON data in incomming requests.
 server.use(cors());             // configure cross-origin resource sharing for all routes.
-server.use(cookieParser());     // configure the server to parse cookies  in incomming requests.
+server.use(cookieParser());     // configure the server to parse cookies in incomming requests.
 
 
 server.get("/", welcomeMessage);
