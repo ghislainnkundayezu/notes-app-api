@@ -1,6 +1,6 @@
 # Description.
 **Project Name:** Notely.
-**Description:** This project is an API which enables the client to Create, Edit, Delete and Save notes in a database.
+**Description:** This project is an API which enables the client to Create, Edit, Delete and Save Documents in a database.
 
 # Installation Instructions.
 
